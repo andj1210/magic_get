@@ -30,10 +30,28 @@ struct StructSz512
 	std::array<uint8_t, 512> array;
 };
 
-//crash for MSVC 2017 / 2019 with permissive -
+//crash for MSVC 2017 / 2019 with permissive - (until patches)
 struct StructSz513
 {
 	std::array<uint8_t, 513> array;
+};
+
+// OK for (MSVC 2017 /) 2019 with permissive - with patches
+struct BigStruct
+{
+	std::array<uint8_t, 2048> array;
+	unsigned u0;
+	unsigned u1;
+	unsigned u2;
+	unsigned u3;
+	unsigned u4;
+	unsigned u5;
+	unsigned u6;
+	unsigned u7;
+	unsigned u8;
+	unsigned u9;
+	unsigned u10;
+	unsigned u11;
 };
 
 TEST_CASE("Structure 255")
@@ -60,10 +78,30 @@ TEST_CASE("Structure 512")
 	REQUIRE(boost::pfr::tuple_size_v<StructSz512> == 1);
 }
 
+template <class T, std::size_t N, class = boost::pfr::detail::enable_if_constructible_helper_t<T, N>>
+void fun(long)
+{}
+
+template<class T, std::size_t N>
+void fun(int)
+{}
+
 TEST_CASE("Structure 513")
 {
 	StructSz513 test;
 
 	REQUIRE(sizeof(StructSz513) == 513);
-	// C1202: REQUIRE(boost::pfr::tuple_size_v<StructSz513> == 1);
+
+	fun<StructSz513, 1024>(1L); // no C1202
+	//fun<StructSz513, 1025>(1L); // C1202
+
+	REQUIRE(boost::pfr::tuple_size_v<StructSz513> == 1); // used to be C1202 
 }
+
+TEST_CASE("BigStruct")
+{
+	BigStruct test;	
+	REQUIRE(boost::pfr::tuple_size_v<BigStruct> == 1); // C1202 freedom
+}
+
+

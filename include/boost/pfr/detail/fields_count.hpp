@@ -204,8 +204,20 @@ constexpr std::size_t fields_count() noexcept {
 //    );
 //#endif
 
-    constexpr std::size_t max_fields_count = (sizeof(type) * CHAR_BIT); // We multiply by CHAR_BIT because the type may have bitfields in T
+#ifdef _MSC_VER
+	// prevent C1202 by limiting the maximum field count
+	constexpr std::size_t fields_count_compiler_limit = 1024;	
+#else
+	constexpr std::size_t fields_count_compiler_limit = std::numeric_limits<std::size_t>::max();
+#endif
+
+    constexpr std::size_t max_fields_count = std::min((sizeof(type) * CHAR_BIT), fields_count_compiler_limit); // We multiply by CHAR_BIT because the type may have bitfields in T
     constexpr std::size_t result = detail::detect_fields_count_dispatch<type>(size_t_<max_fields_count>{}, 1L, 1L);
+
+	static_assert(
+		result != fields_count_compiler_limit,
+		"====================> Boost.PFR: Field count reaches the compiler limit."
+		); // if we hit the compiler limit on point, we have to assume there are more fields we didn´t check for.
 
     static_assert(
         is_aggregate_initializable_n<type, result>::value,
