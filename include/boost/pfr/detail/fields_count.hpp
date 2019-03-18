@@ -111,8 +111,9 @@ constexpr auto detect_fields_count(size_t_<Begin>, size_t_<Middle>, long) noexce
 
 template <class T, std::size_t Begin, std::size_t Middle>
 constexpr std::size_t detect_fields_count(size_t_<Begin>, size_t_<Middle>, int) noexcept {
-    using next_t = size_t_<(Begin + Middle) / 2>;
-    return detail::detect_fields_count<T>(size_t_<Begin>{}, next_t{}, 1L);
+	constexpr std::size_t next = (Begin + Middle) / 2;
+	using next_t = size_t_<next>;
+    return detail::detect_fields_count<T, Begin, next>(size_t_<Begin>{}, next_t{}, 1L);
 }
 
 ///////////////////// Greedy search. Templates instantiation depth is log(sizeof(T)), templates instantiation count is log(sizeof(T))*T in worst case.
@@ -130,7 +131,7 @@ constexpr std::size_t detect_fields_count_greedy_remember(size_t_<N>, int) noexc
 
 template <class T, std::size_t N>
 constexpr std::size_t detect_fields_count_greedy(size_t_<N>, size_t_<N>) noexcept {
-    return detail::detect_fields_count_greedy_remember<T>(size_t_<N>{}, 1L);
+    return detail::detect_fields_count_greedy_remember<T, N>(size_t_<N>{}, 1L);
 }
 
 template <class T, std::size_t Begin, std::size_t Last>

@@ -40,6 +40,30 @@ TEST_CASE("Structure 255")
 {
 	StructSz255 test;
 
-	REQUIRE(boost::pfr::tuple_size_v<StructSz255> == 255);
+	REQUIRE(sizeof(StructSz255) == 255);
+	REQUIRE(boost::pfr::tuple_size_v<StructSz255> == 1);
 }
 
+TEST_CASE("Structure 256")
+{
+	StructSz256 test;
+
+	REQUIRE(sizeof(StructSz256) == 256);
+	REQUIRE(boost::pfr::tuple_size_v<StructSz256> == 1);
+}
+
+TEST_CASE("Structure 512")
+{
+	StructSz512 test;
+
+	REQUIRE(sizeof(StructSz512) == 512);
+	REQUIRE(boost::pfr::tuple_size_v<StructSz512> == 1);
+}
+
+TEST_CASE("Structure 513")
+{
+	StructSz513 test;
+
+	REQUIRE(sizeof(StructSz513) == 513);
+	// C1202: REQUIRE(boost::pfr::tuple_size_v<StructSz513> == 1);
+}
