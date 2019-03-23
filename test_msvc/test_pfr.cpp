@@ -226,15 +226,34 @@ struct Struct342Fail
     int field336; int field337; int field338; int field339; int field340; int field341;
 };
 
+// a layout from a "real world" struct, that failed in msvc
+struct RealWorldStruct
+{
+public:
+   uint32_t field0{ 0 };
+   uint32_t field1{ 0 };
+   uint8_t field2{ 0 };
+   std::array<uint8_t, 31> field3;
+   uint32_t field4{ 0 };
+   uint32_t field5{ 0 };
+   uint32_t field6{ 0 };
+   uint32_t field7{ 0 };
+   uint32_t field8{ 0 };
+   uint32_t field9{ 0 };
+   uint32_t field10{ 0 };
+   std::array<uint8_t, 60> padding;
+};
+
 // fails on both MSVC 2017 15.9.9 & MSVC 2019 RC3 (x86 & x64)
+// -> Pass with 2nd patch
 TEST_CASE("Fails")
 {
-#if 0
+#if 1
     auto volatile sz = boost::pfr::tuple_size_v<Struct342Fail>; // returns 341 instead of 342
     static_assert(boost::pfr::tuple_size_v<Struct342Fail> == 342);
 #endif
 
-#if 0
+#if 1
     // tries to instantiate:
     // "auto boost::pfr::detail::tie_as_tuple<T>(T &,std::integral_constant<unsigned __int64,85>) noexcept"
     // but required
@@ -246,6 +265,17 @@ TEST_CASE("Fails")
         {
             REQUIRE(val == 0);
         }
+    );
+#endif
+       
+#if 1
+    RealWorldStruct img{0};
+    volatile auto sz2 = boost::pfr::tuple_size_v<RealWorldStruct>;
+    boost::pfr::for_each_field(img,
+       [](auto& val)
+       {
+          REQUIRE(1); // just happy when it compiles at all :)
+       }
     );
 #endif
 }
